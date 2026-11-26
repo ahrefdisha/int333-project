@@ -22,12 +22,10 @@ services:
     restart: unless-stopped
 
   metrics-exporter:
-    image: python:3.11-alpine
+    image: nginx:alpine
     container_name: int333-metrics-exporter
-    working_dir: /metrics
     volumes:
-      - ./metrics:/metrics:ro
-    command: ["python3", "-m", "http.server", "8000"]
+      - ./metrics:/usr/share/nginx/html:ro
     restart: unless-stopped
 
   prometheus:
