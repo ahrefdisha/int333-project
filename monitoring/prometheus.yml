@@ -1,8 +1,11 @@
 global:
   scrape_interval: 5s
+  evaluation_interval: 5s
+
+rule_files:
+  - /etc/prometheus/alert_rules.yml
 
 scrape_configs:
-  - job_name: 'int333_web_service'
-    metrics_path: /health
+  - job_name: 'int333_sre_metrics'
     static_configs:
-      - targets: ['web-service:80']
+      - targets: ['metrics-exporter:8000']

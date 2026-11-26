@@ -13,11 +13,21 @@ services:
     container_name: int333-puppet-enforcer
     volumes:
       - ./manifests:/etc/puppetlabs/code/environments/production/manifests:ro
+      - ./config:/opt/enforced-config
     entrypoint: ["/bin/sh", "-c"]
     command: >
       "puppet parser validate /etc/puppetlabs/code/environments/production/manifests/site.pp &&
-       echo 'Puppet manifest validated successfully.' &&
+       puppet apply -e \"file { '/opt/enforced-config/nginx.conf': ensure => file, source => '/etc/puppetlabs/code/environments/production/manifests/baseline_nginx.conf', mode => '0644' }\" &&
        sleep infinity"
+    restart: unless-stopped
+
+  metrics-exporter:
+    image: python:3.11-alpine
+    container_name: int333-metrics-exporter
+    working_dir: /metrics
+    volumes:
+      - ./metrics:/metrics:ro
+    command: ["python3", "-m", "http.server", "8000"]
     restart: unless-stopped
 
   prometheus:
@@ -27,6 +37,7 @@ services:
       - "9090:9090"
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
     depends_on:
-      - web-service
+      - metrics-exporter
     restart: unless-stopped

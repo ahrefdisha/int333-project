@@ -1,0 +1,17 @@
+groups:
+  - name: int333_sre_alerts
+    rules:
+      - alert: WebServiceDown
+        expr: int333_service_up == 0
+        for: 5s
+        labels:
+          severity: critical
+        annotations:
+          summary: "INT333 Nginx Web Service is DOWN"
+
+      - alert: ConfigurationDriftDetected
+        expr: increase(int333_config_drift_total[5m]) > 0
+        labels:
+          severity: warning
+        annotations:
+          summary: "Unauthorized configuration drift detected and auto-remediated"
