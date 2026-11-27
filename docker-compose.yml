@@ -42,7 +42,8 @@ services:
       "grep -q 'hosts.cfg' /opt/nagios/etc/nagios.cfg || echo 'cfg_file=/opt/nagios/etc/objects/hosts.cfg' >> /opt/nagios/etc/nagios.cfg;
        grep -q 'services.cfg' /opt/nagios/etc/nagios.cfg || echo 'cfg_file=/opt/nagios/etc/objects/services.cfg' >> /opt/nagios/etc/nagios.cfg;
        grep -q 'custom_commands.cfg' /opt/nagios/etc/nagios.cfg || echo 'cfg_file=/opt/nagios/etc/objects/custom_commands.cfg' >> /opt/nagios/etc/nagios.cfg;
-       /usr/local/bin/start_nagios"
+       /opt/nagios/bin/nagios -v /opt/nagios/etc/nagios.cfg &&
+       exec /usr/local/bin/start_nagios"
     depends_on:
       - web-service
     restart: unless-stopped
