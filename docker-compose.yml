@@ -22,6 +22,31 @@ services:
        sleep infinity"
     restart: unless-stopped
 
+  nagios:
+    image: jasonrivers/nagios:latest
+    container_name: int333-nagios
+    ports:
+      - "8082:80"
+    environment:
+      - NAGIOSADMIN_USER=nagiosadmin
+      - NAGIOSADMIN_PASS=admin
+    volumes:
+      - ./nagios/objects/hosts.cfg:/opt/nagios/etc/objects/hosts.cfg:ro
+      - ./nagios/objects/services.cfg:/opt/nagios/etc/objects/services.cfg:ro
+      - ./nagios/objects/commands.cfg:/opt/nagios/etc/objects/custom_commands.cfg:ro
+      - ./nagios/check_config_drift.sh:/opt/nagios/libexec/check_config_drift.sh:ro
+      - ./manifests:/opt/manifests:ro
+      - ./config:/opt/config:ro
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      "grep -q 'hosts.cfg' /opt/nagios/etc/nagios.cfg || echo 'cfg_file=/opt/nagios/etc/objects/hosts.cfg' >> /opt/nagios/etc/nagios.cfg;
+       grep -q 'services.cfg' /opt/nagios/etc/nagios.cfg || echo 'cfg_file=/opt/nagios/etc/objects/services.cfg' >> /opt/nagios/etc/nagios.cfg;
+       grep -q 'custom_commands.cfg' /opt/nagios/etc/nagios.cfg || echo 'cfg_file=/opt/nagios/etc/objects/custom_commands.cfg' >> /opt/nagios/etc/nagios.cfg;
+       /usr/local/bin/start_nagios"
+    depends_on:
+      - web-service
+    restart: unless-stopped
+
   metrics-exporter:
     image: nginx:alpine
     container_name: int333-metrics-exporter
